@@ -1,0 +1,8 @@
+### Create a new record
+POST http://localhost:8080/api/records
+Content-Type: application/json
+
+{
+  "title": "新しい学習記録",
+  "content": "POSTリクエストのテスト"
+}

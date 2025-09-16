@@ -1,0 +1,41 @@
+# docker-compose.yml
+version: '3.8'
+
+# ここから下に、起動したいサービス（コンテナ）を定義していく
+services:
+  # 1. フロントエンド (Next.js) の設定
+  frontend:
+    build: ./frontend       # ./frontend フォルダにあるDockerfileを元にコンテナを作る
+    ports:
+      - "3000:3000"         # PCの3000番ポートをコンテナの3000番に繋ぐ
+    volumes:
+      - ./frontend:/app     # PCのfrontendフォルダとコンテナの/appフォルダを同期させる
+      - /app/node_modules   # node_modulesは同期対象から除外（おまじない）
+    depends_on:
+      - backend             # backendが起動してからfrontendを起動する
+
+  # 2. バックエンド (Go) の設定
+  backend:
+    build: ./backend        # ./backend フォルダにあるDockerfileを元にコンテナを作る
+    ports:
+      - "8080:8080"         # PCの8080番ポートをコンテナの8080番に繋ぐ
+    volumes:
+      - ./backend:/app      # PCのbackendフォルダとコンテナの/appフォルダを同期させる
+    depends_on:
+      - db                  # dbが起動してからbackendを起動する
+
+  # 3. データベース (MySQL) の設定
+  db:
+    image: mysql:8.0        # Docker Hubにある公式のMySQLイメージを直接使う
+    environment:            # MySQLの初期設定（環境変数）
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: review_me_db
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+    ports:
+      - "3306:3306"
+    volumes:
+      - db-data:/var/lib/mysql # DBのデータをPC側に保存し、コンテナを消してもデータが消えないようにする
+
+volumes:
+  db-data:
